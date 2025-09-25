@@ -1,0 +1,63 @@
+# ---- Build artifacts ----
+/build/
+/bin/
+/lib/
+/out/
+/dist/
+/CMakeFiles/
+/CMakeCache.txt
+/cmake_install.cmake
+/compile_commands.json
+/Makefile
+
+# ---- VSCode ----
+.vscode/
+*.code-workspace
+
+# ---- OS-specific files ----
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# ---- Logs and temp files ----
+*.log
+*.tmp
+*.bak
+
+# ---- Compiled binaries ----
+*.o
+*.obj
+*.so
+*.dll
+*.dylib
+*.exe
+*.out
+
+# ---- Generated files ----
+*.generated.*
+*.pch
+*.pdb
+
+# ---- Vulkan shader binaries ----
+*.spv
+
+# ---- Backup & editor-specific ----
+*~
+*.swp
+*.swo
+*.user
+
+# ---- Conan / vcpkg / package managers ----
+/.conan/
+/conanbuildinfo.*
+/vcpkg_installed/
+/vcpkg/
+
+# ---- Clangd / LSP tools ----
+/.cache/
+/.clangd/
