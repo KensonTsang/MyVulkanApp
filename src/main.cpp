@@ -4,14 +4,14 @@
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
-
+ 
 int main() {
     lve::FirstApp app;
 
     try {
         app.run();
     } catch (const std::exception &e) {
-        std::cerr << e.what() << "\n";
+        std::cerr << "Exception caught: " << e.what() << "\n";
         return EXIT_FAILURE;
     }
 
