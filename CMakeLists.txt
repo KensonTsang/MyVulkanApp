@@ -19,6 +19,7 @@ add_executable(VulkanApp
     src/lve_window.cpp
     src/first_app.cpp
     src/lve_pipline.cpp
+    src/lve_device.cpp
 )
 
 # Add include directory

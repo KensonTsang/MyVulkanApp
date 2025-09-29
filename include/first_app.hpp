@@ -2,6 +2,7 @@
 
 #include "lve_window.hpp"
 #include "lve_pipeline.hpp"
+#include "lve_device.hpp"
 
 namespace lve {
 
@@ -15,7 +16,11 @@ namespace lve {
 
     private:
         LveWindow lveWindow{WIDTH, HEIGHT, "Hello Vulkan!"};
-        LvePipline lvePipline{"../shaders/simple_shader.vert.spv", "../shaders/simple_shader.frag.spv"};
+        LveDevice lveDevice{lveWindow};
+        LvePipline lvePipline{lveDevice,
+                    "../shaders/simple_shader.vert.spv",
+                    "../shaders/simple_shader.frag.spv",
+                    LvePipline::defaultPipelineConfigInfo(WIDTH, HEIGHT)};
     };
 
 }
