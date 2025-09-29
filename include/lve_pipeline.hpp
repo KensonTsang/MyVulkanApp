@@ -9,7 +9,18 @@ namespace lve {
 
 
     struct PipelineConfigInfo {
-
+        VkViewport viewport;
+        VkRect2D scissor;
+        VkPipelineViewportStateCreateInfo viewportInfo;
+        VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
+        VkPipelineRasterizationStateCreateInfo rasterizationInfo;
+        VkPipelineMultisampleStateCreateInfo multisampleInfo;
+        VkPipelineColorBlendAttachmentState colorBlendAttachment;
+        VkPipelineColorBlendStateCreateInfo colorBlendInfo;
+        VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
+        VkPipelineLayout pipelineLayout = nullptr;
+        VkRenderPass renderPass = nullptr;
+        uint32_t subpass = 0;
     };
 
     class LvePipline {
@@ -20,7 +31,7 @@ namespace lve {
                         const PipelineConfigInfo& configInfo);
 
 
-            ~LvePipline(){}
+            ~LvePipline();
 
             LvePipline(const LvePipline&) = delete;
             void operator=(const LvePipline&) = delete;
@@ -40,7 +51,7 @@ namespace lve {
                 
 
             LveDevice& lveDevice;
-            VkPipeline grahicsPipline;
+            VkPipeline graphicsPipeline;
             VkShaderModule vertShaderModule;
             VkShaderModule fragShaderModule;
     };
