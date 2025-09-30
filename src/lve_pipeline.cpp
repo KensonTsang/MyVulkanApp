@@ -8,20 +8,20 @@
 
 namespace lve {
 
-    LvePipline::LvePipline(LveDevice& device,
+    LvePipeline::LvePipeline(LveDevice& device,
                         const std::string& vertFilepath,
                         const std::string& fragFilepath,
                         const PipelineConfigInfo& configInfo) : lveDevice(device){
         createGraphicsPipeline(vertFilepath, fragFilepath, configInfo);
     }
 
-    LvePipline::~LvePipline() {
+    LvePipeline::~LvePipeline() {
         vkDestroyShaderModule(lveDevice.device(), vertShaderModule, nullptr);
         vkDestroyShaderModule(lveDevice.device(), fragShaderModule, nullptr);
         vkDestroyPipeline(lveDevice.device(), graphicsPipeline, nullptr);
     }
 
-    std::vector<char> LvePipline::readFile(const std::string& filepath) {
+    std::vector<char> LvePipeline::readFile(const std::string& filepath) {
         std::ifstream file{filepath, std::ios::ate | std::ios::binary};
         
         if(!file.is_open()) {
@@ -39,7 +39,7 @@ namespace lve {
     }
 
 
-    void LvePipline::createGraphicsPipeline(const std::string& vertFilepath, const std::string& fragFilepath, const PipelineConfigInfo& configInfo) {
+    void LvePipeline::createGraphicsPipeline(const std::string& vertFilepath, const std::string& fragFilepath, const PipelineConfigInfo& configInfo) {
         auto vertCode = readFile(vertFilepath);
         auto fragCode = readFile(fragFilepath);
 
@@ -83,6 +83,14 @@ namespace lve {
         vertexInputInfo.pVertexAttributeDescriptions = nullptr;
         vertexInputInfo.pVertexBindingDescriptions = nullptr;
 
+            
+        VkPipelineViewportStateCreateInfo viewportInfo{};
+        viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+        viewportInfo.viewportCount = 1;
+        viewportInfo.pViewports = &configInfo.viewport;
+        viewportInfo.scissorCount = 1;
+        viewportInfo.pScissors = &configInfo.scissor;
+
 
         VkGraphicsPipelineCreateInfo pipelineInfo{};
         pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -90,7 +98,7 @@ namespace lve {
         pipelineInfo.pStages = shaderStages;
         pipelineInfo.pVertexInputState = &vertexInputInfo;
         pipelineInfo.pInputAssemblyState = &configInfo.inputAssemblyInfo;
-        pipelineInfo.pViewportState = &configInfo.viewportInfo;
+        pipelineInfo.pViewportState = &viewportInfo;
         pipelineInfo.pRasterizationState = &configInfo.rasterizationInfo;
         pipelineInfo.pMultisampleState = &configInfo.multisampleInfo;
         pipelineInfo.pColorBlendState = &configInfo.colorBlendInfo;
@@ -113,7 +121,7 @@ namespace lve {
 
     }
 
-    void LvePipline::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule) {
+    void LvePipeline::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule) {
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.codeSize = code.size();
@@ -124,7 +132,7 @@ namespace lve {
         }
     }
 
-    PipelineConfigInfo LvePipline::defaultPipelineConfigInfo(uint32_t width, uint32_t height) {
+    PipelineConfigInfo LvePipeline::defaultPipelineConfigInfo(uint32_t width, uint32_t height) {
         PipelineConfigInfo configInfo{};
 
         configInfo.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -141,11 +149,6 @@ namespace lve {
         configInfo.scissor.offset = {0, 0};
         configInfo.scissor.extent = {width, height};
 
-        configInfo.viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-        configInfo.viewportInfo.viewportCount = 1;
-        configInfo.viewportInfo.pViewports = &configInfo.viewport;
-        configInfo.viewportInfo.scissorCount = 1;
-        configInfo.viewportInfo.pScissors = &configInfo.scissor;
 
         configInfo.rasterizationInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
         configInfo.rasterizationInfo.depthClampEnable = VK_FALSE;
