@@ -28,3 +28,35 @@ target_include_directories(VulkanApp PRIVATE include)
 
 # Link the Vulkan and GLFW libraries to our app
 target_link_libraries(VulkanApp PUBLIC Vulkan::Vulkan glfw)
+
+# Shader compilation setup
+set(GLSL_VALIDATOR "${Vulkan_INCLUDE_DIRS}/../bin/glslc")
+
+# Find all shader files
+file(GLOB_RECURSE GLSL_SOURCE_FILES
+    "${PROJECT_SOURCE_DIR}/shaders/*.frag"
+    "${PROJECT_SOURCE_DIR}/shaders/*.vert"
+)
+
+# Create custom target for shader compilation
+foreach(GLSL ${GLSL_SOURCE_FILES})
+    get_filename_component(FILE_NAME ${GLSL} NAME)
+    set(SPIRV "${PROJECT_SOURCE_DIR}/shaders/${FILE_NAME}.spv")
+    add_custom_command(
+        OUTPUT ${SPIRV}
+        COMMAND ${GLSL_VALIDATOR} ${GLSL} -o ${SPIRV}
+        DEPENDS ${GLSL}
+        COMMENT "Compiling ${FILE_NAME}"
+    )
+    list(APPEND SPIRV_BINARY_FILES ${SPIRV})
+endforeach(GLSL)
+
+# Create a target that depends on all shader files
+add_custom_target(
+    Shaders 
+    DEPENDS ${SPIRV_BINARY_FILES}
+    COMMENT "Compiling shaders"
+)
+
+# Make sure shaders are compiled before the main executable
+add_dependencies(VulkanApp Shaders)
