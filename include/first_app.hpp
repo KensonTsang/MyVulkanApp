@@ -9,25 +9,24 @@
 #include <memory>
 #include <vector>
 
-namespace lve {
+namespace lve
+{
 
-    class FirstApp {    
+    class FirstApp
+    {
     public:
-
         void run();
 
         FirstApp();
         ~FirstApp();
 
-        FirstApp(const FirstApp&) = delete;
-        FirstApp &operator= (const FirstApp&) = delete;
+        FirstApp(const FirstApp &) = delete;
+        FirstApp &operator=(const FirstApp &) = delete;
 
-    
         static constexpr int WIDTH = 800;
         static constexpr int HEIGHT = 600;
 
     private:
-
         void createPipelineLayout();
         void createPipeline();
         void createCommandBuffers();
@@ -35,7 +34,7 @@ namespace lve {
 
         LveWindow lveWindow{WIDTH, HEIGHT, "Hello Vulkan!"};
         LveDevice lveDevice{lveWindow};
-        LveSwapChain lveSwapChain{lveDevice, lveWindow.getExtent()};       
+        LveSwapChain lveSwapChain{lveDevice, lveWindow.getExtent()};
         std::unique_ptr<LvePipeline> lvePipeline;
         VkPipelineLayout pipelineLayout;
         std::vector<VkCommandBuffer> commandBuffers;

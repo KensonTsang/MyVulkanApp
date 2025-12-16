@@ -1,31 +1,30 @@
 #pragma once
 
-
 #define VK_ENABLE_BETA_EXTENSIONS
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
 #include <string>
 
+namespace lve
+{
 
-namespace lve {
+    class LveWindow
+    {
 
-
-    class LveWindow {
-
-        public:
+    public:
         LveWindow(int w, int h, std::string name);
         ~LveWindow();
 
         LveWindow(const LveWindow &) = delete;
-        LveWindow &operator= (const LveWindow &) = delete;
+        LveWindow &operator=(const LveWindow &) = delete;
 
         bool shouldClose() { return glfwWindowShouldClose(window); };
-        VkExtent2D getExtent() {return {static_cast<u_int32_t>(width), static_cast<u_int32_t>(height)};}
+        VkExtent2D getExtent() { return {static_cast<u_int32_t>(width), static_cast<u_int32_t>(height)}; }
 
-        void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
+        void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
 
-        private:
+    private:
         void initWindow();
 
         const int width;
@@ -33,7 +32,5 @@ namespace lve {
 
         std::string windowName;
         GLFWwindow *window;
-
     };
 }
-
