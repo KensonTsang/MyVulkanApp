@@ -21,6 +21,7 @@ add_executable(VulkanApp
     src/lve_pipeline.cpp
     src/lve_device.cpp
     src/lve_swap_chain.cpp
+    src/lve_model.cpp
 )
 
 # Add include directory

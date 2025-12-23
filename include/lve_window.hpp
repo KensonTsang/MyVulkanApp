@@ -6,31 +6,28 @@
 
 #include <string>
 
-namespace lve
-{
+namespace lve {
 
-    class LveWindow
-    {
+class LveWindow {
+ public:
+  LveWindow(int w, int h, std::string name);
+  ~LveWindow();
 
-    public:
-        LveWindow(int w, int h, std::string name);
-        ~LveWindow();
+  LveWindow(const LveWindow&) = delete;
+  LveWindow& operator=(const LveWindow&) = delete;
 
-        LveWindow(const LveWindow &) = delete;
-        LveWindow &operator=(const LveWindow &) = delete;
+  bool shouldClose() { return glfwWindowShouldClose(window); };
+  VkExtent2D getExtent() { return {static_cast<u_int32_t>(width), static_cast<u_int32_t>(height)}; }
 
-        bool shouldClose() { return glfwWindowShouldClose(window); };
-        VkExtent2D getExtent() { return {static_cast<u_int32_t>(width), static_cast<u_int32_t>(height)}; }
+  void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 
-        void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
+ private:
+  void initWindow();
 
-    private:
-        void initWindow();
+  const int width;
+  const int height;
 
-        const int width;
-        const int height;
-
-        std::string windowName;
-        GLFWwindow *window;
-    };
-}
+  std::string windowName;
+  GLFWwindow* window;
+};
+}  // namespace lve

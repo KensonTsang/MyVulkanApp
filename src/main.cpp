@@ -1,22 +1,18 @@
-#include "first_app.hpp"
-
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
 
-int main()
-{
-    lve::FirstApp app;
+#include "first_app.hpp"
 
-    try
-    {
-        app.run();
-    }
-    catch (const std::exception &e)
-    {
-        std::cerr << "Exception caught: " << e.what() << "\n";
-        return EXIT_FAILURE;
-    }
+int main() {
+  lve::FirstApp app;
 
-    return EXIT_SUCCESS;
+  try {
+    app.run();
+  } catch (const std::exception& e) {
+    std::cerr << "Exception caught: " << e.what() << "\n";
+    return EXIT_FAILURE;
+  }
+
+  return EXIT_SUCCESS;
 }
