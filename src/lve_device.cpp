@@ -406,6 +406,7 @@ void LveDevice::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
   bufferInfo.usage = usage;
   bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
+  // Ask Vulkan to create a buffer
   if (vkCreateBuffer(device_, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
     throw std::runtime_error("failed to create vertex buffer!");
   }

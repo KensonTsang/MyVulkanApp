@@ -6,6 +6,23 @@
 
 namespace lve {
 
+void FirstApp::sierpinski(std::vector<LveModel::Vertex>& vertices, int depth, glm::vec2 left,
+                          glm::vec2 right, glm::vec2 top) {
+  if (depth <= 0) {
+    vertices.push_back({{top}, {1.0f, 0.0f, 0.0f}});
+    vertices.push_back({{right}, {0.0f, 1.0f, 0.0f}});
+    vertices.push_back({{left}, {0.0f, 0.0f, 1.0f}});
+  } else {
+    auto left_top = 0.5f * (left + top);
+    auto right_top = 0.5f * (right + top);
+    auto left_right = 0.5f * (left + right);
+
+    sierpinski(vertices, depth - 1, left_top, right_top, top);
+    sierpinski(vertices, depth - 1, left_right, right, right_top);
+    sierpinski(vertices, depth - 1, left, left_top, left_right);
+  }
+}
+
 FirstApp::FirstApp() {
   loadModels();
   createPipelineLayout();
@@ -50,8 +67,8 @@ void FirstApp::createPipeline() {
 }
 
 void FirstApp::loadModels() {
-  std::vector<LveModel::Vertex> vertices{{{0.0f, -0.5f}}, {{0.5f, 0.5f}}, {{-0.5f, 0.5f}}};
-
+  std::vector<LveModel::Vertex> vertices{};
+  sierpinski(vertices, 3, {-0.5f, 0.5f}, {0.5f, 0.5f}, {0.0f, -0.5f});
   lveModel = std::make_unique<LveModel>(lveDevice, vertices);
 }
 
