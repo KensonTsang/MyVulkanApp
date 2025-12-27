@@ -13,6 +13,19 @@ namespace lve {
 
 LveSwapChain::LveSwapChain(LveDevice& deviceRef, VkExtent2D extent)
     : device{deviceRef}, windowExtent{extent} {
+  init();
+}
+
+LveSwapChain::LveSwapChain(LveDevice& deviceRef, VkExtent2D extent,
+                           std::shared_ptr<LveSwapChain> previous)
+    : device{deviceRef}, windowExtent{extent}, oldSwapChain(previous) {
+  init();
+
+  // clean up the old swap chain since it's no longer needed
+  oldSwapChain = nullptr;
+}
+
+void LveSwapChain::init() {
   createSwapChain();
   createImageViews();
   createRenderPass();
@@ -154,7 +167,7 @@ void LveSwapChain::createSwapChain() {
   createInfo.presentMode = presentMode;
   createInfo.clipped = VK_TRUE;
 
-  createInfo.oldSwapchain = VK_NULL_HANDLE;
+  createInfo.oldSwapchain = oldSwapChain == nullptr ? VK_NULL_HANDLE : oldSwapChain->swapChain;
 
   if (vkCreateSwapchainKHR(device.device(), &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
     throw std::runtime_error("failed to create swap chain!");
@@ -205,7 +218,7 @@ void LveSwapChain::createRenderPass() {
   depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
   VkAttachmentReference depthAttachmentRef{};
-  depthAttachmentRef.attachment = 1;
+  depthAttachmentRef.attachment = 1;  // the slot 1 in frameBuffer means depth imageView
   depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
   VkAttachmentDescription colorAttachment = {};
@@ -219,7 +232,7 @@ void LveSwapChain::createRenderPass() {
   colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
   VkAttachmentReference colorAttachmentRef = {};
-  colorAttachmentRef.attachment = 0;
+  colorAttachmentRef.attachment = 0;  // the slot 0 in frameBuffer means color imageView
   colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
   VkSubpassDescription subpass = {};
