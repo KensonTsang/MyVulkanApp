@@ -1,6 +1,10 @@
 #include "first_app.hpp"
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <array>
+#include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 #include <iostream>
 #include <stdexcept>
 
@@ -24,7 +28,7 @@ void FirstApp::sierpinski(std::vector<LveModel::Vertex>& vertices, int depth, gl
 }
 
 FirstApp::FirstApp() {
-  loadModels();
+  loadGameObjects();
   createPipelineLayout();
   recreateSwapChain();
   createCommandBuffers();
@@ -33,6 +37,8 @@ FirstApp::FirstApp() {
 FirstApp::~FirstApp() { vkDestroyPipelineLayout(lveDevice.device(), pipelineLayout, nullptr); }
 
 void FirstApp::run() {
+  std::cout << "maxPushConstantSize: " << lveDevice.properties.limits.maxPushConstantsSize << "\n";
+
   while (!lveWindow.shouldClose()) {
     glfwPollEvents();
     drawFrame();
@@ -43,13 +49,18 @@ void FirstApp::run() {
 }
 
 void FirstApp::createPipelineLayout() {
+  VkPushConstantRange pushConstantRange{};
+  pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+  pushConstantRange.offset = 0;
+  pushConstantRange.size = sizeof(SimplePushConstantData);
+
   VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
   pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
   pipelineLayoutInfo.setLayoutCount = 0;
   pipelineLayoutInfo.pSetLayouts = nullptr;
   pipelineLayoutInfo.pushConstantRangeCount =
-      0;  // very efficiently send a small amount data to shader program
-  pipelineLayoutInfo.pPushConstantRanges = nullptr;
+      1;  // very efficiently send a small amount data to shader program
+  pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
   if (vkCreatePipelineLayout(lveDevice.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) !=
       VK_SUCCESS) {
@@ -92,10 +103,19 @@ void FirstApp::recreateSwapChain() {
   createPipeline();
 }
 
-void FirstApp::loadModels() {
+void FirstApp::loadGameObjects() {
   std::vector<LveModel::Vertex> vertices{};
-  sierpinski(vertices, 3, {-0.5f, 0.5f}, {0.5f, 0.5f}, {0.0f, -0.5f});
-  lveModel = std::make_unique<LveModel>(lveDevice, vertices);
+  sierpinski(vertices, 0, {-0.5f, 0.5f}, {0.5f, 0.5f}, {0.0f, -0.5f});
+  auto lveModel = std::make_shared<LveModel>(lveDevice, vertices);
+
+  auto triangle = LveGameObject::createGameObject();
+  triangle.model = lveModel;
+  triangle.color = {.1f, .8f, .1f};
+  triangle.transform2d.translation.x = .2f;
+  triangle.transform2d.scale = {1.5f, 1.0f};
+  triangle.transform2d.rotation = 0.25f * glm::two_pi<float>();
+
+  gameObjects.push_back(std::move(triangle));
 }
 
 void FirstApp::createCommandBuffers() {
@@ -137,7 +157,7 @@ void FirstApp::recordCommandBuffer(int imageIndex) {
   renderPassInfo.renderArea.extent = lveSwapChain->getSwapChainExtent();
 
   std::array<VkClearValue, 2> clearValues{};
-  clearValues[0].color = {0.1f, 0.1f, 0.1f, 1.0f};
+  clearValues[0].color = {0.01f, 0.01f, 0.01f, 1.0f};
   clearValues[1].depthStencil = {1.0f, 0};
   renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
   renderPassInfo.pClearValues = clearValues.data();
@@ -156,13 +176,31 @@ void FirstApp::recordCommandBuffer(int imageIndex) {
   vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
   vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
 
-  lvePipeline->bind(commandBuffers[imageIndex]);
-  lveModel->bind(commandBuffers[imageIndex]);
-  lveModel->draw(commandBuffers[imageIndex]);
+  renderGameObjects(commandBuffers[imageIndex]);
 
   vkCmdEndRenderPass(commandBuffers[imageIndex]);
   if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS) {
     throw std::runtime_error("failed to record command buffer!");
+  }
+}
+
+void FirstApp::renderGameObjects(VkCommandBuffer commandBuffer) {
+  lvePipeline->bind(commandBuffer);
+  for (auto& gameObject : gameObjects) {
+    gameObject.transform2d.rotation =
+        glm::mod<float>(gameObject.transform2d.rotation + 0.01f, glm::two_pi<float>());
+
+    SimplePushConstantData push{};
+    push.offset = gameObject.transform2d.translation;
+    push.color = gameObject.color;
+    push.transform = gameObject.transform2d.mat2();
+
+    vkCmdPushConstants(commandBuffer, pipelineLayout,
+                       VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0,
+                       sizeof(SimplePushConstantData), &push);
+
+    gameObject.model->bind(commandBuffer);
+    gameObject.model->draw(commandBuffer);
   }
 }
 

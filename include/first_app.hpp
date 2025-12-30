@@ -1,7 +1,12 @@
 #pragma once
 
+#pragma once
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
+
 #include "lve_device.hpp"
-#include "lve_model.hpp"
+#include "lve_gameobject.hpp"
 #include "lve_pipeline.hpp"
 #include "lve_swap_chain.hpp"
 #include "lve_window.hpp"
@@ -11,6 +16,12 @@
 #include <vector>
 
 namespace lve {
+
+struct SimplePushConstantData {
+  glm::mat2 transform{1.0f};
+  glm::vec2 offset;
+  alignas(16) glm::vec3 color;
+};
 
 class FirstApp {
  public:
@@ -26,7 +37,7 @@ class FirstApp {
   static constexpr int HEIGHT = 600;
 
  private:
-  void loadModels();
+  void loadGameObjects();
   void createPipelineLayout();
   void createPipeline();
   void createCommandBuffers();
@@ -34,6 +45,7 @@ class FirstApp {
   void drawFrame();
   void recreateSwapChain();
   void recordCommandBuffer(int imageIndex);
+  void renderGameObjects(VkCommandBuffer commandBuffer);
 
   void sierpinski(std::vector<LveModel::Vertex>& vertices, int depth, glm::vec2 left,
                   glm::vec2 right, glm::vec2 top);
@@ -44,7 +56,7 @@ class FirstApp {
   std::unique_ptr<LvePipeline> lvePipeline;
   VkPipelineLayout pipelineLayout;
   std::vector<VkCommandBuffer> commandBuffers;
-  std::unique_ptr<LveModel> lveModel;
+  std::vector<LveGameObject> gameObjects;
 };
 
 }  // namespace lve
