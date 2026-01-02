@@ -15,13 +15,15 @@ find_package(glfw3 REQUIRED)
 
 # Add our executable from all source files
 add_executable(VulkanApp 
-    src/main.cpp
+    src/main.cpp    
     src/lve_window.cpp
     src/first_app.cpp
     src/lve_pipeline.cpp
     src/lve_device.cpp
     src/lve_swap_chain.cpp
     src/lve_model.cpp
+    src/lve_renderer.cpp    
+    src/simple_render_system.cpp
 )
 
 # Add include directory
