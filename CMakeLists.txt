@@ -24,6 +24,7 @@ add_executable(VulkanApp
     src/lve_model.cpp
     src/lve_renderer.cpp    
     src/simple_render_system.cpp
+    src/lve_camera.cpp
 )
 
 # Add include directory
