@@ -1,11 +1,13 @@
 #include "first_app.hpp"
 
+#include "keyboard_movement_controller.hpp"
 #include "lve_camera.hpp"
 #include "simple_render_system.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <array>
+#include <chrono>
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 #include <iostream>
@@ -98,10 +100,23 @@ void FirstApp::run() {
   SimpleRenderSystem simpleRenderSystem{lveDevice, lveRenderer.getSwapChainRenderPass()};
   LveCamera camera{};
   // camera.setViewDirection(glm::vec3(0.0f), glm::vec3(0.5f, 0.0f, 1.0f));
-  camera.setViewTarget(glm::vec3(-1.0f, -2.f, 20.f), glm::vec3(0.0f, 0.0f, 2.5f));
+  camera.setViewTarget(glm::vec3(-1.0f, -2.f, 10.f), glm::vec3(0.0f, 0.0f, 2.5f));
+
+  auto viewerObject = LveGameObject::createGameObject();
+  KeyboardMovementController cameraController{};
+
+  auto currentTime = std::chrono::high_resolution_clock::now();
 
   while (!lveWindow.shouldClose()) {
     glfwPollEvents();
+
+    auto newTime = std::chrono::high_resolution_clock::now();
+    float frameTime =
+        std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+    currentTime = std::chrono::high_resolution_clock::now();
+
+    cameraController.moveInPlanzeXZ(lveWindow.getGLFWwindow(), frameTime, viewerObject);
+    camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
 
     // Update camera projection matrix each frame to handle window resizing
     float aspect = lveRenderer.getAspectRatio();
